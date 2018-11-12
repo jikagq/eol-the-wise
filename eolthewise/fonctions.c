@@ -7,7 +7,7 @@
 #include "fonctions.h"
 #include "ADC.h"
 
-#define pin_girouette 4
+#define pin_girouette 3
 #define pin_temp 5
 #define pin_humi 6
 #define pin_lum 7
