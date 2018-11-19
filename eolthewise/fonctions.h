@@ -33,6 +33,6 @@ int get_humi(mesures *p);
 int get_lum(mesures *p);
 int get_temp(mesures *p);
 
-
+void simupwm(int angle);
 
 #endif /* FONCTIONS_H_ */

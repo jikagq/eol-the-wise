@@ -69,6 +69,7 @@ int main(void)
 
 	while(1){
 	    //attendre la requette
+	    update_valeurs(&data_mesures);
 	}
 
 

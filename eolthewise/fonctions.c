@@ -4,8 +4,10 @@
  *  Created on: 12 nov. 2018
  *      Author: theo-
  */
+#include <msp430.h>
 #include "fonctions.h"
 #include "ADC.h"
+
 
 #define pin_girouette 3
 #define pin_temp 5
@@ -20,6 +22,18 @@ void ini_fonctions(mesures *p){
     p->humi = 0;
     p->lum = 0;
     p->temp = 0;
+
+    /*ini pwm*/
+
+    P2DIR |= BIT2;
+    P2SEL |= BIT4;
+    P2SEL2 &= ~BIT4;
+    TA1CTL=TASSEL_2 | MC_1;
+    TA1CCTL1|= OUTMOD_7;
+
+    TA1CCR0 = 20000;
+    TA1CCR1 = 1500;
+
 }
 
 /*met à jour la structure*/
@@ -66,4 +80,14 @@ int get_temp(mesures *p){
     return p->temp ;
 }
 
+void send_all_value(mesures *p){
+    //p->angle;
+    //p->humi;
+    //p->lum;
+   // p->temp;
+}
 
+
+void simupwm(int angle){
+
+}
