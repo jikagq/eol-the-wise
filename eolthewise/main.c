@@ -44,16 +44,7 @@ int main(void)
 	    }
 
 
-
-
-	//P1DIR |= 0x01; // met ligne P1.0 en sortie
-	//P1DIR &= ~(0x08); // met ligne P1.3 en entrée
-
 	P1DIR &= ~(BIT3|BIT5|BIT6|BIT7);//capteurs
-
-
-
-	//P2DIR bits spi
 
 	ADC_init();
 	ini_fonctions(&data_mesures);
@@ -65,13 +56,17 @@ int main(void)
 	 * pas sur que le msp ai le tps de renvoyer toutes les valeurs lorsque il en reçoi la demande
 	 * ajouter des led sur le port2
 	 */
-	statut_pwm= 0;
-	pwm = 0;
+	statut_pwm= 1;
+	pwm = 1500;
+
+
+
 
 	while(1){
 	    //attendre la requette
 	    //update_valeurs(&data_mesures);
-	    simupwm(statut_pwm, pwm);
+	   simupwm(statut_pwm, pwm);//pin p2.4
+
 	}
 
 

@@ -55,7 +55,7 @@ __interrupt void USCI0RX_ISR (void)
 
   switch(c){
       case 'u':{//mise à jour des capteurs
-          update_valeurs(&data_mesures);
+          update_valeurs(&data_mesures);// pb à cause des boucles de l'adc !!!!!!!!!!!!!!!!!!!!!!
           break;
              }
       case 'g':{//orientation/girouztte
