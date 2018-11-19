@@ -16,6 +16,8 @@
  */
 
 mesures data_mesures;
+int statut_pwm; //0= pas de pwm 1=pwm en sortie
+int pwm; //valeur de la pwm
 
 void ini_spi(void){
     while (!(P1IN & BIT4));                   // If clock sig from mstr stays low,
@@ -50,20 +52,40 @@ __interrupt void USCI0RX_ISR (void)
   char c = ' ';
   c = UCA0RXBUF;
 
-  if(c == 'u'){
-      update_valeurs(&data_mesures);
-    }
-  if(c == 'g'){
 
-    }
-  if(c == 'h'){
+  switch(c){
+      case 'u':{//mise à jour des capteurs
+          update_valeurs(&data_mesures);
+          break;
+             }
+      case 'g':{//orientation/girouztte
+          UCA0TXBUF = get_angle(&data_mesures);
+          break;
+             }
+      case 'h':{//humidité
+          UCA0TXBUF = get_humi(&data_mesures);
+          break;
+           }
 
-    }
-  if(c == 'l'){
-
-    }
-  if(c == 't'){
-
-    }
-
+       case 'l':{//luminosité
+           UCA0TXBUF = get_lum(&data_mesures);
+           break;
+           }
+       case 't':{//température
+           UCA0TXBUF = get_temp(&data_mesures);
+           break;
+           }
+       case 'p':{//controle pwm servo
+           /*recuperer les valeurs en payload */
+           //statut_pwm = ; //0= pas de pwm 1=pwm en sortie
+           //pwm = ; //valeur de la pwm
+           break;
+           }
+       default :{
+           //rien
+           break;
+           }
+      }
 }
+
+

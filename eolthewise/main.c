@@ -24,7 +24,8 @@
  */
 
 mesures data_mesures;
-
+int statut_pwm; //0= pas de pwm 1=pwm en sortie
+int pwm; //valeur de la pwm
 
 int main(void)
 {
@@ -64,12 +65,13 @@ int main(void)
 	 * pas sur que le msp ai le tps de renvoyer toutes les valeurs lorsque il en reçoi la demande
 	 * ajouter des led sur le port2
 	 */
-
-
+	statut_pwm= 0;
+	pwm = 0;
 
 	while(1){
 	    //attendre la requette
-	    update_valeurs(&data_mesures);
+	    //update_valeurs(&data_mesures);
+	    simupwm(statut_pwm, pwm);
 	}
 
 

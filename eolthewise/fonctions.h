@@ -19,6 +19,8 @@ typedef struct
 } mesures;
 
 extern mesures data_mesures;//variable position de type pos
+extern int statut_pwm;
+extern int pwm;
 
 void ini_fonctions(mesures *p);
 void update_valeurs(mesures *p);
@@ -33,6 +35,6 @@ int get_humi(mesures *p);
 int get_lum(mesures *p);
 int get_temp(mesures *p);
 
-void simupwm(int angle);
+void simupwm(int actif, int angle);
 
 #endif /* FONCTIONS_H_ */

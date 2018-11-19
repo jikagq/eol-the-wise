@@ -14,7 +14,9 @@
 #define pin_humi 6
 #define pin_lum 7
 
-mesures data_mesures;
+mesures data_mesures; //variables des capteurs
+int statut_pwm; //0= pas de pwm 1=pwm en sortie
+int pwm; //valeur de la pwm
 
 /*initialise la structure*/
 void ini_fonctions(mesures *p){
@@ -23,9 +25,12 @@ void ini_fonctions(mesures *p){
     p->lum = 0;
     p->temp = 0;
 
+    statut_pwm = 0;
+    pwm = 0;
+
     /*ini pwm*/
 
-    P2DIR |= BIT2;
+    P2DIR |= BIT4;
     P2SEL |= BIT4;
     P2SEL2 &= ~BIT4;
     TA1CTL=TASSEL_2 | MC_1;
@@ -88,6 +93,10 @@ void send_all_value(mesures *p){
 }
 
 
-void simupwm(int angle){
-
+void simupwm(int actif, int pwm){
+    if(actif == 0){
+        TA1CCR1 = 0;
+    }else{
+        TA1CCR1 = pwm;
+    }
 }
