@@ -34,12 +34,6 @@ int testmode=0;
 
 
 
-/*var uart*/
-//volatile int flag_trame_uart_recu;
-
-
-
-
 
 
 
@@ -95,7 +89,7 @@ int main(void)
 	ini_fonctions(&data_mesures);
 	//ini_spi();
 	InitUART();// for tests
-	//__bis_SR_register(GIE); // interrupts enabled
+	__bis_SR_register(GIE); // interrupts enabled
 
 	statut_pwm= 1;
 	pwm = 1500;
@@ -109,7 +103,8 @@ int main(void)
 	        interpreteur_uart();
 	        reset_uart();//une fois traitement fini reset
 	    }else{
-	        reset_uart();
+	        //reset_uart();
+	        ;
 	    }
 
 
@@ -139,7 +134,7 @@ int main(void)
            TXdata(784+'0');
 	    }*/
 
-	    delay(1000);
+	    //delay(1000);
 	}
 
 

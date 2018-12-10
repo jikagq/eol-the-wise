@@ -15,6 +15,7 @@ volatile char Trame_uart_rx[8];
 volatile char Trame_uart_tx[8];
 volatile int unsigned index_uart_rx_buffer=0;//buffer rx uart
 volatile int flag_trame_uart_recu=0;
+volatile unsigned char car_recu;
 
 void InitUART(void)
 {
@@ -40,9 +41,8 @@ void InitUART(void)
 #pragma vector=USCIAB0RX_VECTOR
 __interrupt void USCI0RX_ISR (void)
 {
-       unsigned char car_recu;
        car_recu = UCA0RXBUF;//lecture du registre
-       if(car_recu == '\0'){//fin de la trame
+       if(car_recu == ';'){//fin de la trame
            Trame_uart_rx[index_uart_rx_buffer]=car_recu;//dernier char
            flag_trame_uart_recu=1;
        }else{//sinon on ajoute le caractaire Ã  la chaine
@@ -66,6 +66,7 @@ void TXframe( char *texte )
         i++;
     }
     TXdata('\0');//fin
+    TXdata('\n');//fin
 }
 
 
@@ -87,7 +88,9 @@ void interpreteur_uart(void){
 
     switch(c){
           case '0' :{//mode test test
-              TXframe("test_ok \n");
+              TXframe("Frame detected");
+              TXframe("Ground telemetry ok");
+              TXframe("Test ok :)");
               break;
           }
           case 'f' :{//forçage update de l'adc
