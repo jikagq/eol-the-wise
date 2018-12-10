@@ -34,19 +34,20 @@ void ini_fonctions(mesures *p){
     P2SEL |= BIT4;
     P2SEL2 &= ~BIT4;
     TA1CTL=TASSEL_2 | MC_1;
-    TA1CCTL1|= OUTMOD_7;
+
+    TA1CCTL2|= OUTMOD_7;
 
     TA1CCR0 = 20000;
-    TA1CCR1 = 1500;
+    TA1CCR2 = 0;
 
 }
 
 /*met à jour la structure*/
 void update_valeurs(mesures *p){
     p->angle = get_girouette();
-    p->humi = get_temperature();
-    p->lum = get_humidite();
-    p->temp = get_luminosite();
+    p-> temp = get_temperature();
+    p->humi = get_humidite();
+    p-> lum = get_luminosite();
 }
 
 /*lit l'adc*/
@@ -95,8 +96,8 @@ void send_all_value(mesures *p){
 
 void simupwm(int actif, int pwm){
     if(actif == 0){
-        TA1CCR1 = 0;
+        TA1CCR2 = 0;
     }else{
-        TA1CCR1 = pwm;
+        TA1CCR2 = pwm;
     }
 }

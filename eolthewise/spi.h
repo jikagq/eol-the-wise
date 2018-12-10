@@ -9,7 +9,7 @@
 #define SPI_H_
 
 
-
+void ini_spi(void);
 
 
 #endif /* SPI_H_ */
