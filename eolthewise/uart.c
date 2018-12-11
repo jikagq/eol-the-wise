@@ -156,6 +156,7 @@ void interpreteur_uart(void){
                break;
                }
            case 'p':{//controle pwm servo
+               controle_servo();//p:1,255;
                /*recuperer les valeurs en payload */
                //statut_pwm = ; //0= pas de pwm 1=pwm en sortie
                //pwm = ; //valeur de la pwm
@@ -168,9 +169,24 @@ void interpreteur_uart(void){
           }
 }
 
-void controle_servo(){
+void controle_servo(void){
+    int i =4;//demarre du carac 4
+    int etat =0;
+    int pwm =0;
+    char tmp[4];
 
+    etat = Trame_uart_rx[2] - '0';
 
+  /**  while(i < 8){
+     tmp[i-4] = Trame_uart_rx[i];
+     i++;
+    }**/
+    for(i=4;i<8;i++){
+        tmp[i-4] = Trame_uart_rx[i];
+    }
+
+    pwm=atoi(&tmp);
+    simupwm(etat, pwm);
 
 }
 
@@ -187,15 +203,6 @@ void ajout_trame_uart(char type_de_mesure, char *tab_temp, char *Trame_uart_tx){
 
     //Trame_uart_tx[8] = '\0';
 }
-
-
-
-/*void send_all_value(mesures *p){
-    //p->angle;
-    //p->humi;
-    //p->lum;
-   // p->temp;
-}*/
 
 
 void reset_uart(void){

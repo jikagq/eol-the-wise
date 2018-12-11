@@ -27,5 +27,6 @@ void itoad(long unsigned int value, char *result, int base);
 void reset_uart(void);
 void interpreteur_uart(void);
 void ajout_trame_uart(char type_de_mesure, char *tab_temp, char *Trame_uart_tx);
+void controle_servo(void);
 
 #endif /* UART_H_ */

@@ -41,11 +41,6 @@ int main(void)
 	InitUART();// utilisation de l'uart via usb pour transmission
 	__bis_SR_register(GIE); // interrupts enabled
 
-	statut_pwm= 1;//utilise ou pas la pwm
-	pwm = 1500;
-
-
-
 	while(1){
 	    if(flag_trame_uart_recu == 1){//check si une trame valide a été reçu
 	        interpreteur_uart();
