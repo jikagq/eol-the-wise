@@ -101,9 +101,25 @@ void interpreteur_uart(void){
           case 's' :{//send all
                 update_valeurs(&data_mesures);
 
+                itoad(get_angle(&data_mesures), &tab_temp, 10);
+                ajout_trame_uart('g',&tab_temp,&Trame_uart_tx);
+                TXframe(&Trame_uart_tx);
+                reset_uart();
 
+                itoad(get_humi(&data_mesures), &tab_temp, 10);
+                ajout_trame_uart('h',&tab_temp,&Trame_uart_tx);
+                TXframe(&Trame_uart_tx);
+                reset_uart();
 
+                itoad(get_lum(&data_mesures), &tab_temp, 10);
+                ajout_trame_uart('l',&tab_temp,&Trame_uart_tx);
+                TXframe(&Trame_uart_tx);
+                reset_uart();
 
+                itoad(get_temp(&data_mesures), &tab_temp, 10);
+                ajout_trame_uart('t',&tab_temp,&Trame_uart_tx);
+                TXframe(&Trame_uart_tx);
+                reset_uart();
                 break;
                   }
           case 'u':{//mise à jour des capteurs
@@ -150,6 +166,10 @@ void interpreteur_uart(void){
                break;
                }
           }
+}
+
+void controle_servo(){
+
 
 
 }
