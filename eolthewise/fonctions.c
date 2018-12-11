@@ -21,7 +21,7 @@ int testvar = 123;
 
 /*initialise la structure*/
 void ini_fonctions(mesures *p){
-    p->angle = 121;
+    p->angle = 1234;
     p->humi = 600;
     p->lum = 10;
     p->temp = 64;

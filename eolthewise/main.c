@@ -31,42 +31,6 @@ int pwm; //valeur de la pwm
 int testmode=0;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int main(void)
 {
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
@@ -83,8 +47,6 @@ int main(void)
 
 
 	while(1){
-
-
 	    if(flag_trame_uart_recu == 1){//check si une trame valide a été reçu
 	        interpreteur_uart();
 	        reset_uart();//une fois traitement fini reset
@@ -92,48 +54,9 @@ int main(void)
 	        //reset_uart();
 	        ;
 	    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	    /*if(testmode ==0){
-	        //update_valeurs(&data_mesures);
-	        //simupwm(statut_pwm, pwm);//pin p2.4
-           TXdata('a');
-           TXdata(784+'0');
-	    }*/
-
-	    //delay(1000);
 	}
-
-
 	return 0;
 }
-
-
-
-
-
-
-
-
 
 /**delai du pauvre*/
 void delay (unsigned int ms)
@@ -146,22 +69,3 @@ void delay (unsigned int ms)
     }
 }
 
-
-
-//test =  get_angle(&data_mesures);
-//test = get_humi(&data_mesures);
-//test = get_lum(&data_mesures);
-//test =  get_temp(&data_mesures);
-
-/*TXdata('a');
-TXdata((char)get_angle(&data_mesures));
-TXdata('\n');
-TXdata('h');
-TXdata((char)get_humi(&data_mesures));
-TXdata('\n');
-TXdata('l');
-TXdata((char)get_lum(&data_mesures));
-TXdata('\n');
-TXdata('t');
-TXdata((char)get_temp(&data_mesures));
-TXdata('\n');*/

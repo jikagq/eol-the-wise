@@ -20,11 +20,12 @@ extern volatile int flag_trame_uart_recu;
 
 void InitUART(void);
 void TXdata( unsigned char c );
-void pong(void);
+void TXframe( char *texte );
 void ack(void);
 void nak(void);
 void itoad(long unsigned int value, char *result, int base);
 void reset_uart(void);
 void interpreteur_uart(void);
+void ajout_trame_uart(char type_de_mesure, char *tab_temp, char *Trame_uart_tx);
 
 #endif /* UART_H_ */

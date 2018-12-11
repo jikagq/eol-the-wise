@@ -98,12 +98,11 @@ void interpreteur_uart(void){
               TXframe("Test ok :)");
               break;
           }
-          case 'f' :{//forçage update de l'adc
-                update_valeurs(&data_mesures);// pb à cause des boucles de l'adc !!!!!!!!!!!!!!!!!!!!!!
-                ack();
-                break;
-            }
           case 's' :{//send all
+                update_valeurs(&data_mesures);
+
+
+
 
                 break;
                   }
@@ -113,16 +112,14 @@ void interpreteur_uart(void){
               break;
                  }
           case 'g':{//girouette
-              itoad(get_angle(&data_mesures), &tab_temp, 10);
-             //itoad(121, &tab_temp, 10);
-              ajout_trame_uart('g',&tab_temp,&Trame_uart_tx);
-              TXframe(&Trame_uart_tx);
-              reset_uart();
+             itoad(get_angle(&data_mesures), &tab_temp, 10);
+             ajout_trame_uart('g',&tab_temp,&Trame_uart_tx);
+             TXframe(&Trame_uart_tx);
+             reset_uart();
               break;
                  }
           case 'h':{//humidité
                itoad(get_humi(&data_mesures), &tab_temp, 10);
-              //itoad(121, &tab_temp, 10);
                ajout_trame_uart('h',&tab_temp,&Trame_uart_tx);
                TXframe(&Trame_uart_tx);
                reset_uart();
@@ -130,7 +127,6 @@ void interpreteur_uart(void){
                }
            case 'l':{//luminosité
                itoad(get_lum(&data_mesures), &tab_temp, 10);
-               //itoad(121, &tab_temp, 10);
                 ajout_trame_uart('l',&tab_temp,&Trame_uart_tx);
                 TXframe(&Trame_uart_tx);
                 reset_uart();
@@ -138,7 +134,6 @@ void interpreteur_uart(void){
                }
            case 't':{//température
                itoad(get_temp(&data_mesures), &tab_temp, 10);
-               //itoad(121, &tab_temp, 10);
                 ajout_trame_uart('t',&tab_temp,&Trame_uart_tx);
                 TXframe(&Trame_uart_tx);
                 reset_uart();
@@ -159,20 +154,22 @@ void interpreteur_uart(void){
 
 }
 
-ajout_trame_uart(char type_de_mesure, char *tab_temp, char *Trame_uart_tx){
+void ajout_trame_uart(char type_de_mesure, char *tab_temp, char *Trame_uart_tx){
     int i=0;
 
     Trame_uart_tx[0] = type_de_mesure;
     Trame_uart_tx[1] = ':';
 
-    for(i=2; i<7;i++){
+   for(i=2; i<8;i++){
         Trame_uart_tx[i] = tab_temp [i-2];
     }
 
 
-    Trame_uart_tx[8] = '\0';
-
+    //Trame_uart_tx[8] = '\0';
 }
+
+
+
 /*void send_all_value(mesures *p){
     //p->angle;
     //p->humi;
