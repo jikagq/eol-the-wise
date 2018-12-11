@@ -10,12 +10,17 @@
 
 
 #include "uart.h"
+#include "fonctions.h"
 
 volatile char Trame_uart_rx[8];
 volatile char Trame_uart_tx[8];
 volatile int unsigned index_uart_rx_buffer=0;//buffer rx uart
 volatile int flag_trame_uart_recu=0;
 volatile unsigned char car_recu;
+
+char tab_temp[4];//tableau temporraire pour faire la conversion int en char*
+
+mesures data_mesures;
 
 void InitUART(void)
 {
@@ -94,36 +99,49 @@ void interpreteur_uart(void){
               break;
           }
           case 'f' :{//forçage update de l'adc
-              //update_valeurs(&data_mesures)/4;// pb à cause des boucles de l'adc !!!!!!!!!!!!!!!!!!!!!!
+                update_valeurs(&data_mesures);// pb à cause des boucles de l'adc !!!!!!!!!!!!!!!!!!!!!!
                 ack();
                 break;
             }
           case 's' :{//send all
 
-                      break;
+                break;
                   }
           case 'u':{//mise à jour des capteurs
-
-
+              update_valeurs(&data_mesures);
+              ack();
               break;
                  }
           case 'g':{//girouette
-
-              //UCA0TXBUF = get_angle(&data_mesures)/4;
+              itoad(get_angle(&data_mesures), &tab_temp, 10);
+             //itoad(121, &tab_temp, 10);
+              ajout_trame_uart('g',&tab_temp,&Trame_uart_tx);
+              TXframe(&Trame_uart_tx);
+              reset_uart();
               break;
                  }
           case 'h':{//humidité
-
-              //UCA0TXBUF = get_humi(&data_mesures)/4;
+               itoad(get_humi(&data_mesures), &tab_temp, 10);
+              //itoad(121, &tab_temp, 10);
+               ajout_trame_uart('h',&tab_temp,&Trame_uart_tx);
+               TXframe(&Trame_uart_tx);
+               reset_uart();
               break;
                }
            case 'l':{//luminosité
-
-               //UCA0TXBUF = get_lum(&data_mesures)/4;
+               itoad(get_lum(&data_mesures), &tab_temp, 10);
+               //itoad(121, &tab_temp, 10);
+                ajout_trame_uart('l',&tab_temp,&Trame_uart_tx);
+                TXframe(&Trame_uart_tx);
+                reset_uart();
                break;
                }
            case 't':{//température
-
+               itoad(get_temp(&data_mesures), &tab_temp, 10);
+               //itoad(121, &tab_temp, 10);
+                ajout_trame_uart('t',&tab_temp,&Trame_uart_tx);
+                TXframe(&Trame_uart_tx);
+                reset_uart();
                break;
                }
            case 'p':{//controle pwm servo
@@ -141,7 +159,26 @@ void interpreteur_uart(void){
 
 }
 
+ajout_trame_uart(char type_de_mesure, char *tab_temp, char *Trame_uart_tx){
+    int i=0;
 
+    Trame_uart_tx[0] = type_de_mesure;
+    Trame_uart_tx[1] = ':';
+
+    for(i=2; i<7;i++){
+        Trame_uart_tx[i] = tab_temp [i-2];
+    }
+
+
+    Trame_uart_tx[8] = '\0';
+
+}
+/*void send_all_value(mesures *p){
+    //p->angle;
+    //p->humi;
+    //p->lum;
+   // p->temp;
+}*/
 
 
 void reset_uart(void){
@@ -152,50 +189,11 @@ void reset_uart(void){
         Trame_uart_rx[i] = '\0' ;
         Trame_uart_tx[i] = '\0';
     }
-}
+    for(i =0;i<4;i++){
+        tab_temp[i] = '\0' ;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void ack(void){
-    unsigned int i;
-    char ack[] = "ack";
-    for(i=0;i<4;i++){
-        TXdata(ack[i]);
     }
 }
-void nak(void){
-    unsigned int i;
-    char nak[] = "nak";
-    for(i=0;i<4;i++){
-        TXdata(nak[i]);
-    }
-}
-
-
-
-
-
-
-
 
 
 void itoad(long unsigned int value, char *result, int base){//conversion entier en char *
@@ -222,5 +220,22 @@ void itoad(long unsigned int value, char *result, int base){//conversion entier 
         *ptr1++ = tmp_char;
       }
 
+}
+
+
+
+void ack(void){
+    unsigned int i;
+    char ack[] = "ack";
+    for(i=0;i<4;i++){
+        TXdata(ack[i]);
+    }
+}
+void nak(void){
+    unsigned int i;
+    char nak[] = "nak";
+    for(i=0;i<4;i++){
+        TXdata(nak[i]);
+    }
 }
 

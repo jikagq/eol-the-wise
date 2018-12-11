@@ -17,13 +17,15 @@
 mesures data_mesures; //variables des capteurs
 int statut_pwm; //0= pas de pwm 1=pwm en sortie
 int pwm; //valeur de la pwm
+int testvar = 123;
 
 /*initialise la structure*/
 void ini_fonctions(mesures *p){
-    p->angle = 0;
-    p->humi = 0;
-    p->lum = 0;
-    p->temp = 0;
+    p->angle = 121;
+    p->humi = 600;
+    p->lum = 10;
+    p->temp = 64;
+
 
     statut_pwm = 0;
     pwm = 0;
@@ -74,7 +76,7 @@ int get_luminosite(void){
 
 /*accede aux valeurs de la structures*/
 int get_angle(mesures *p){
-    return p->angle ;
+    return p->angle;
 }
 int get_humi(mesures *p){
     return p->humi ;
@@ -86,12 +88,7 @@ int get_temp(mesures *p){
     return p->temp ;
 }
 
-void send_all_value(mesures *p){
-    //p->angle;
-    //p->humi;
-    //p->lum;
-   // p->temp;
-}
+
 
 
 void simupwm(int actif, int pwm){

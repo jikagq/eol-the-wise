@@ -70,28 +70,14 @@ int testmode=0;
 int main(void)
 {
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
-
-	/*if(CALBC1_1MHZ==0xFF || CALDCO_1MHZ==0xFF)
-	    {
-	        __bis_SR_register(LPM4_bits); // Low Power Mode #trap on Error
-	    }
-	    else
-	    {
-	       // Factory parameters
-	       DCOCTL = 0;
-	       BCSCTL1 = CALBC1_1MHZ;
-	       DCOCTL = (0 | CALDCO_1MHZ);
-	    }*/
-
-
 	P1DIR &= ~(BIT3|BIT5|BIT6|BIT7);//capteurs
 	ADC_init();
 	ini_fonctions(&data_mesures);
 	//ini_spi();
-	InitUART();// for tests
+	InitUART();// utilisation de l'uart via usb pour transmission
 	__bis_SR_register(GIE); // interrupts enabled
 
-	statut_pwm= 1;
+	statut_pwm= 1;//utilise ou pas la pwm
 	pwm = 1500;
 
 
@@ -99,7 +85,7 @@ int main(void)
 	while(1){
 
 
-	    if(flag_trame_uart_recu == 1){
+	    if(flag_trame_uart_recu == 1){//check si une trame valide a été reçu
 	        interpreteur_uart();
 	        reset_uart();//une fois traitement fini reset
 	    }else{
