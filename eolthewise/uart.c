@@ -72,6 +72,7 @@ void TXframe( char *texte )
     }
     TXdata('\0');//fin
     TXdata('\n');//fin
+    TXdata('\r');//fin
 }
 
 
@@ -157,6 +158,7 @@ void interpreteur_uart(void){
                }
            case 'p':{//controle pwm servo
                controle_servo();//p:1,255;
+               reset_uart();
                /*recuperer les valeurs en payload */
                //statut_pwm = ; //0= pas de pwm 1=pwm en sortie
                //pwm = ; //valeur de la pwm
@@ -254,6 +256,9 @@ void ack(void){
     for(i=0;i<4;i++){
         TXdata(ack[i]);
     }
+    TXdata('\0');//fin
+    TXdata('\n');//fin
+    TXdata('\r');//fin
 }
 void nak(void){
     unsigned int i;
@@ -261,5 +266,8 @@ void nak(void){
     for(i=0;i<4;i++){
         TXdata(nak[i]);
     }
+    TXdata('\0');//fin
+    TXdata('\n');//fin
+    TXdata('\r');//fin
 }
 
