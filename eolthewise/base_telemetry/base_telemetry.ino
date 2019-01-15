@@ -54,7 +54,7 @@ bool flag_trame_recu=0;
 
 /*servomoteurs*/
 Servo Servo1;
-//Servo Servo2;
+Servo Servo2;
 
 
 void setup() {
@@ -83,12 +83,13 @@ void setup() {
   
   /*ina219 ini*/
   ina219.begin();
+  /*calibration si besoin*/
   //ina219.setCalibration_32V_1A();
   //ina219.setCalibration_16V_400mA();
 
   /*servomoteurs*/
   Servo1.attach(ServoPin1);
-  //Servo2.attach(ServoPin2);
+  Servo2.attach(ServoPin2);
 
   }
 
@@ -233,12 +234,10 @@ void update_valeurs(void){
 
    
 
-  encodeur = String(get_encoder_raw()); 
-   //Serial.println("ici");
-   windspeed = String(get_windspeed_raw());
-   //Serial.println("la");
-   humidite = String(get_humi_raw());
+   encodeur = String(get_encoder_raw()); 
 
+   windspeed = String(get_windspeed_raw());
+   humidite = String(get_humi_raw());
    rain = String(get_rain_raw());
 
    voltage = String(get_voltage_raw());

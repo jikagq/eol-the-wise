@@ -41,19 +41,28 @@ long get_humi_raw(void){
 long getFrequency(int pin) {
   //https://tushev.org/articles/arduino/9/measuring-frequency-with-arduino
   //We wait for the pulse to occur in 250 mS. If you are using very slow signals, increase this value as you need. (pin, HIGH, 250000)
-  #define SAMPLES 4096
+  #define SAMPLES 4
   long freq = 0;
   for(unsigned int j=0; j<SAMPLES; j++){
     freq+= 500000/pulseIn(pin, LOW, 250000);//low or high ? + timeout
-    Serial.println(j);
+    //Serial.println(j);
+    //2*4096ech*0.25s=34min d'attente!!! 
   }
+  
+  if((freq / SAMPLES) == -1){
+    Serial.println("timeout !");
+  }else{
+    Serial.println(freq / SAMPLES);
+  }
+  
   return freq / SAMPLES;
 }
 
 
 float get_rain_raw(void){
-  float rain_raw = 0;
-  return rain_raw * 0,2794;
+  //float rain_raw = 0;
+  //Serial.println(pluie_tick * 0,2794);
+  return pluie_tick * 0,2794;
 }
 void int_pluvio(void){
    pluie_tick++;
