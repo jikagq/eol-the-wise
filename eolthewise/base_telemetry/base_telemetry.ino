@@ -1,5 +1,11 @@
 #include <Adafruit_INA219.h>
-//#include <Wire.h>
+#include <Wire.h>
+
+#include <Servo.h>
+
+//#include <FreqMeasure.h>
+
+
 
 /*code base station telemetry*/
 
@@ -8,50 +14,52 @@
 #define LightPin 1
 #define GirouettePin 2
 
-
-
 /*digital measures*/
-#define AnemometerPin 2
-#define PluviometerPin 3
-#define HumiPin 4
-
 #define EncodePin0 4
 #define EncodePin1 5
 #define EncodePin2 6
 #define EncodePin3 7
 
+#define AnemometerPin 2
+#define HumiPin 8
+
+//#define PluviometerPin 3
+
+
 /*Servo Pins*/
-#define ServoPin1 10
-//#define ServoPin2 11
+#define ServoPin1 9
+#define ServoPin2 10
 
 /*I2C PINS*/
 Adafruit_INA219 ina219;
 
+String temperature = "0";
+String luminosite = "0";
+String girouette = "0";
 
-int temp = 0;
-int lum = 0;
-int gir = 0;
+String encodeur = "0";
+String windspeed = "0";
+String humidite = "0";
+//String pluie = "0";
 
-int wind_tick =0;
-int enc =0;
-int humi =0;
-int rain =0;
+String voltage = "0";
+String current = "0";
+String power = "0";
 
-int voltage =0;
-int current =0 ;
-int power =0;
 
+/*Var communication*/
 char incomingChar = '\0';   // for incoming serial data
 String Trame_RX ="";
 String Trame_TX ="";
 bool flag_trame_recu=0;
 
-
+/*servomoteurs*/
+Servo Servo1;
 
 
 void setup() {
   Serial.begin(9600);      // open the serial port at 9600 bps:
-  ina219.begin();
+  
   
   pinMode(LED_BUILTIN, OUTPUT);  // initialize digital pin LED_BUILTIN as an output.
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
@@ -65,13 +73,20 @@ void setup() {
   pinMode(EncodePin2, INPUT);
   pinMode(EncodePin3, INPUT);
 
-  pinMode(AnemometerPin, INPUT_PULLUP);
+  //pinMode(AnemometerPin, INPUT_PULLUP);
+  pinMode(AnemometerPin, INPUT);
+  pinMode(HumiPin, INPUT);
   
+  /*ina219 ini*/
+  ina219.begin();
+  //ina219.setCalibration_32V_1A();
+  //ina219.setCalibration_16V_400mA();
 
-  //attachInterrupt(digitalPinToInterrupt(Pin), int_, CHANGE);
-  
-  
-}
+  /*servomoteurs*/
+  Servo1.attach(ServoPin1);
+  //Servo2.attach(ServoPin2);
+
+  }
 
 
 
@@ -84,7 +99,7 @@ void loop() {
       //Serial.println("recu: "+Trame_RX);
      reset_all();//une fois traitement fini reset
     }else{
-          digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+      digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
       }
    // delay(100);
 }
@@ -113,49 +128,75 @@ void interpreteur(void){
               reset_all();
               break;
           }
-          case 'p':{//controle pwm servo
-               //controle_servo();//p:1,255;
-//               Control_servo();
+          case '1':{//controle pwm servo
+              String cmd =  Trame_RX;
+              Control_servo(cmd);//1:1,180;
                reset_all();
                break;
           }
-          case 's' :{//send all
+          case '2' :{//send all
                 update_valeurs();
                 Serial.println(send_all_measure());
                 reset_all();
                 break;
           }
-          case 'u':{//mise à jour des capteurs
+          case '3':{//mise à jour des capteurs
               update_valeurs();
               Serial.println("ACK");
               reset_all();
               break;
           }
+          case 't':{//température
+               Trame_TX = temperature+";";
+               Serial.println(Trame_TX);
+               reset_all();
+               break;
+               }
+          case 'l':{//luminosité
+               Trame_TX = luminosite+";";
+               Serial.println(Trame_TX);
+               reset_all();
+               break;
+               }
           case 'g':{//girouette
-              Trame_TX = "g:"+ get_angle();
+              Trame_TX = girouette+";";
               Serial.println(Trame_TX);
               reset_all();
               break;
           }
-          case 'l':{//luminosité
-               Trame_TX = "l:"+ get_lum();
-               Serial.println(Trame_TX);
-               reset_all();
-               break;
-               }
-           case 't':{//température
-               Trame_TX = "t:"+ get_temp();
-               Serial.println(Trame_TX);
-               reset_all();
-               break;
-               }
-          case 'h':{//humidité
-               //suite
+          case 'e':{//encodeur
+              Trame_TX = encodeur+";";
+              Serial.println(Trame_TX);
               reset_all();
               break;
                }
-          case 'e':{//humidité
-               //suite
+          case 'w':{//vitesse anemometre
+              Trame_TX = windspeed+";";
+              Serial.println(Trame_TX);
+              reset_all();
+              break;
+               } 
+          case 'h':{//humidité
+              Trame_TX = humidite+";";
+              Serial.println(Trame_TX);
+              reset_all();
+              break;
+               }
+          case 'v':{//voltage
+              Trame_TX = voltage+";";
+              Serial.println(Trame_TX);
+              reset_all();
+              break;
+               }
+          case 'c':{//current
+              Trame_TX = current+";";
+              Serial.println(Trame_TX);
+              reset_all();
+              break;
+               }
+          case 'p':{//power
+              Trame_TX = power+";";
+              Serial.println(Trame_TX);
               reset_all();
               break;
                }
@@ -173,147 +214,57 @@ void reset_all(void){
   flag_trame_recu =0;
 }
 
-String  send_all_measure(void){
-   String str1 = get_angle();
-   String str2 = get_lum();
-   String str3 = get_temp();
-   String str4 = get_enc();
-   //String str5 =
-   return "g:"+ str1 +" l:"+str2+" t:"+str3 ;
-}
-
-
-/*accede aux valeurs traiter/envoyer*/
-String get_angle(void){
-    return String(gir);
-}
-String get_temp(void){
-    return String(temp);
-}
-String get_lum(void){ 
-    return String(lum);
-}
-String get_enc(void){ 
-    return String(enc);
-}
-
 
 
 void update_valeurs(void){
-   gir   = get_girouette();
-   temp = get_temperature();
-   lum  = get_luminosite();
+   temperature = String(get_temperature_raw());
+   luminosite  = String(get_luminosite_raw());
+   girouette   = String(get_girouette_raw());
 
-   enc = get_encoder();
    
-   //windspeed = get_windspeed();
 
-   //humi = get_humi();
-  // rain = get_rain();
+  encodeur = String(get_encoder_raw()); 
+   //Serial.println("ici");
+   //windspeed = String(get_windspeed_raw());
+   //Serial.println("la");
+   humidite = String(get_humi_raw());
 
-  // voltage = get_volt();
-  // current = get_curr();
-  // power = get_pow();
+   
+
+   voltage = String(get_voltage_raw());
+   current = String(get_current_raw());
+   power = String(get_power_raw());
+
+  //rain = String(get_rain_raw());
 }
 
-/*analogues measures*/
-int get_girouette(void){  
-    return analogRead(GirouettePin) ;
-}
-int get_temperature(void){   
-    return analogRead(TemperaturePin);
-}
-int get_luminosite(void){
-    return analogRead(LightPin);
-}
+String  send_all_measure(void){
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*digital measure*/
-int get_windspeed() {
-  int int_time = millis();
-  int cur_time=0;
-  wind_tick =0;
-  
-  attachInterrupt(digitalPinToInterrupt(AnemometerPin), int_anemometer, CHANGE);
-  while(cur_time < int_time+60000){
-    cur_time = millis();
-  }
-  detachInterrupt(digitalPinToInterrupt(AnemometerPin)) ;
-
-  return wind_tick * 2,4;
-  
-}
-void int_anemometer(){
-  wind_tick++; 
+   return "t:"+temperature+","+"l:"+luminosite+","+"g:"+girouette+","+"e:"+encodeur+","+"w:"+windspeed+","+"h:"+humidite+","+"v:"+voltage+","+"c:"+current+","+"p:"+power+";";
 }
 
 
 
 
 
-int get_pluvio(void){
-  
-}
-int get_humi(void){
-  
-}
 
 
-int get_encoder(){
-  int value=0;
-  value = (digitalRead(EncodePin0)*2^0) + (digitalRead(EncodePin1)*2^1) + ( digitalRead(EncodePin2)*2^2)+ (digitalRead(EncodePin3)*2^3);
-  return value;
-}
 
-/*I2C power measure*/
-float get_INA219_power(){
-  float shuntvoltage = 0;
-  float busvoltage = 0;
-  float current_mA = 0;
-  float loadvoltage = 0;
-  float power_mW = 0;
 
-  shuntvoltage = ina219.getShuntVoltage_mV();
-  busvoltage = ina219.getBusVoltage_V();
-  current_mA = ina219.getCurrent_mA();
-  power_mW = ina219.getPower_mW();
-  loadvoltage = busvoltage + (shuntvoltage / 1000);
-  
-  /*Serial.print("Bus Voltage:   "); Serial.print(busvoltage); Serial.println(" V");
-  Serial.print("Shunt Voltage: "); Serial.print(shuntvoltage); Serial.println(" mV");
-  Serial.print("Load Voltage:  "); Serial.print(loadvoltage); Serial.println(" V");
-  Serial.print("Current:       "); Serial.print(current_mA); Serial.println(" mA");
-  Serial.print("Power:         "); Serial.print(power_mW); Serial.println(" mW");
-  Serial.println("");*/
 
-  return power_mW;
-} 
 
-/*Control_servo(void){
-  bool etat = 0;
-  int pwm = 0;
 
-  Trame_RX.charAt(2);
-  //analogWrite(pinDEL, luminosite);
 
-  
-}*/
+
+
+
+
+
+
+
+
+
+
+
 
 
