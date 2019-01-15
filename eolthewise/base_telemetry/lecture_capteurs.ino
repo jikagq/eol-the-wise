@@ -1,4 +1,5 @@
-int wind_tick =0;
+volatile int wind_tick =0;
+volatile float pluie_tick =0;
 
 /*analogues measures*/
 int get_girouette_raw(void){  
@@ -23,10 +24,44 @@ int get_encoder_raw(){
   return value;
 }
 
+long get_windspeed_raw(void) {
+  //long windspeed_raw = 0;
+  //windspeed_raw = getFrequency(AnemometerPin);
+  //return windspeed_raw;
+  return getFrequency(AnemometerPin)*2,4;
+}
+
+long get_humi_raw(void){
+  //long humidite_raw = 0;
+  //humidite_raw = getFrequency(HumiPin);
+  //return humidite_raw;
+  return getFrequency(HumiPin);
+}
+
+long getFrequency(int pin) {
+  //https://tushev.org/articles/arduino/9/measuring-frequency-with-arduino
+  //We wait for the pulse to occur in 250 mS. If you are using very slow signals, increase this value as you need. (pin, HIGH, 250000)
+  #define SAMPLES 4096
+  long freq = 0;
+  for(unsigned int j=0; j<SAMPLES; j++){
+    freq+= 500000/pulseIn(pin, LOW, 250000);//low or high ? + timeout
+    Serial.println(j);
+  }
+  return freq / SAMPLES;
+}
 
 
-int get_windspeed_raw() {
-  /*avec interruption sur 2 ou 3*/
+float get_rain_raw(void){
+  float rain_raw = 0;
+  return rain_raw * 0,2794;
+}
+void int_pluvio(void){
+   pluie_tick++;
+}
+
+
+/*int get_windspeed_raw() {
+  //avec interruption sur 2 ou 3
   int int_time = millis();
   int cur_time=0;
   wind_tick =0;
@@ -43,18 +78,9 @@ int get_windspeed_raw() {
 }
 void int_anemometer(){
   wind_tick++; 
-}
+}*/
 
 
-
-
-
-
-int get_humi_raw(void){
-  int humidite_raw=0;
-
-  return humidite_raw;
-}
 
 
 
@@ -82,7 +108,9 @@ int get_humi_raw(void){
   return frequency;
 }**/
 
-//https://tushev.org/articles/arduino/9/measuring-frequency-with-arduino
 
 
-// int get_pluvio_raw(void){ }
+
+
+
+

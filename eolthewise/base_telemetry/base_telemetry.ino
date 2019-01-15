@@ -5,8 +5,6 @@
 
 //#include <FreqMeasure.h>
 
-
-
 /*code base station telemetry*/
 
 /*analogue measures*/
@@ -23,7 +21,7 @@
 #define AnemometerPin 2
 #define HumiPin 8
 
-//#define PluviometerPin 3
+#define PluviometerPin 3
 
 
 /*Servo Pins*/
@@ -40,7 +38,8 @@ String girouette = "0";
 String encodeur = "0";
 String windspeed = "0";
 String humidite = "0";
-//String pluie = "0";
+
+String rain = "0";
 
 String voltage = "0";
 String current = "0";
@@ -55,6 +54,7 @@ bool flag_trame_recu=0;
 
 /*servomoteurs*/
 Servo Servo1;
+//Servo Servo2;
 
 
 void setup() {
@@ -76,6 +76,10 @@ void setup() {
   //pinMode(AnemometerPin, INPUT_PULLUP);
   pinMode(AnemometerPin, INPUT);
   pinMode(HumiPin, INPUT);
+
+  /*interruption pour le pluviometre*/
+  pinMode(PluviometerPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(PluviometerPin), int_pluvio, CHANGE);
   
   /*ina219 ini*/
   ina219.begin();
@@ -182,6 +186,12 @@ void interpreteur(void){
               reset_all();
               break;
                }
+          case 'r':{//pluie
+              Trame_TX = rain+";";
+              Serial.println(Trame_TX);
+              reset_all();
+              break;
+               }
           case 'v':{//voltage
               Trame_TX = voltage+";";
               Serial.println(Trame_TX);
@@ -225,22 +235,22 @@ void update_valeurs(void){
 
   encodeur = String(get_encoder_raw()); 
    //Serial.println("ici");
-   //windspeed = String(get_windspeed_raw());
+   windspeed = String(get_windspeed_raw());
    //Serial.println("la");
    humidite = String(get_humi_raw());
 
-   
+   rain = String(get_rain_raw());
 
    voltage = String(get_voltage_raw());
    current = String(get_current_raw());
    power = String(get_power_raw());
 
-  //rain = String(get_rain_raw());
+  
 }
 
 String  send_all_measure(void){
 
-   return "t:"+temperature+","+"l:"+luminosite+","+"g:"+girouette+","+"e:"+encodeur+","+"w:"+windspeed+","+"h:"+humidite+","+"v:"+voltage+","+"c:"+current+","+"p:"+power+";";
+   return "t:"+temperature+","+"l:"+luminosite+","+"g:"+girouette+","+"e:"+encodeur+","+"w:"+windspeed+","+"h:"+humidite+","+"r:"+rain+","+"v:"+voltage+","+"c:"+current+","+"p:"+power+";";
 }
 
 
