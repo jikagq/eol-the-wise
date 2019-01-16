@@ -1,5 +1,6 @@
 volatile int wind_tick =0;
-volatile float pluie_tick =0;
+volatile int pluie_tick =0;
+
 
 /*analogues measures*/
 int get_girouette_raw(void){  
@@ -24,48 +25,82 @@ int get_encoder_raw(){
   return value;
 }
 
-long get_windspeed_raw(void) {
-  //long windspeed_raw = 0;
-  //windspeed_raw = getFrequency(AnemometerPin);
-  //return windspeed_raw;
-  return getFrequency(AnemometerPin)*2,4;
+float get_windspeed_raw(void) {
+  float windspeed_raw = 0;
+  
+  windspeed_raw = getFrequency(AnemometerPin);
+
+  //Serial.println(windspeed_raw);
+  
+  if(windspeed_raw == -1){
+    return 0.0;
+  }else{
+    return windspeed_raw/2.4;
+    //return windspeed_raw;
+  }
 }
 
-long get_humi_raw(void){
-  //long humidite_raw = 0;
-  //humidite_raw = getFrequency(HumiPin);
-  //return humidite_raw;
-  return getFrequency(HumiPin);
+float get_humi_raw(void){
+  float humidite_raw = 0;
+  
+  humidite_raw = getFrequency(HumiPin);
+  if(humidite_raw == -1){
+    return 0.0;
+  }else{
+    return humidite_raw;
+  }
 }
 
 long getFrequency(int pin) {
   //https://tushev.org/articles/arduino/9/measuring-frequency-with-arduino
-  //We wait for the pulse to occur in 250 mS. If you are using very slow signals, increase this value as you need. (pin, HIGH, 250000)
-  #define SAMPLES 4
-  long freq = 0;
+  #define SAMPLES 8
+  long highTime=0;    //integer for storing high time
+  long lowTime=0;     //integer for storing low time
+  float period=0;    // integer for storing period
+  float freq=0;      //storing frequency
+  
   for(unsigned int j=0; j<SAMPLES; j++){
-    freq+= 500000/pulseIn(pin, LOW, 250000);//low or high ? + timeout
-    //Serial.println(j);
+    //freq+= 500000/pulseIn(pin, LOW, 250000);//low or high ? + timeout
+    //freq+= 1000000/((pulseInLong(pin, HIGH, 250000))*2);//low or high ? + timeout
     //2*4096ech*0.25s=34min d'attente!!! 
+
+    highTime=pulseInLong(pin,HIGH, 500000);  //read high time
+    //Serial.println(highTime);
+    lowTime=pulseInLong(pin,LOW, 500000);    //read low time
+    period = highTime+lowTime; // Period = Ton + Toff
+    //Serial.println(period);
+    if(period == 0.0){
+      freq =0;
+    }else{
+      freq += 1000000/period;       //getting frequency with totalTime is in Micro seconds
+    }
+    
   }
-  
-  if((freq / SAMPLES) == -1){
-    Serial.println("timeout !");
-  }else{
-    Serial.println(freq / SAMPLES);
-  }
-  
-  return freq / SAMPLES;
+return freq / SAMPLES;
 }
 
 
 float get_rain_raw(void){
   //float rain_raw = 0;
   //Serial.println(pluie_tick * 0,2794);
-  return pluie_tick * 0,2794;
+  Serial.println(pluie_tick);
+  return pluie_tick * 0.2794;
 }
+
+
+volatile unsigned long lastInterrupt;
 void int_pluvio(void){
+   /*detachInterrupt(digitalPinToInterrupt(PluviometerPin));
+   flag_pluie = 1;
    pluie_tick++;
+   Serial.println(pluie_tick);*/
+
+   if(millis() - lastInterrupt > 10) // we set a 10ms no-interrupts window
+    {    
+      pluie_tick++;
+      //Serial.println(pluie_tick);
+      lastInterrupt = millis();
+    }
 }
 
 

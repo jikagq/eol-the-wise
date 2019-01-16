@@ -13,7 +13,4 @@ void Control_servo(String cmd){
     Servo2.write(angle);
   }
   
-  
-  
-  
 }

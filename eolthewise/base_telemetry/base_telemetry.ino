@@ -18,7 +18,7 @@
 #define EncodePin2 6
 #define EncodePin3 7
 
-#define AnemometerPin 2
+#define AnemometerPin 12
 #define HumiPin 8
 
 #define PluviometerPin 3
@@ -73,13 +73,12 @@ void setup() {
   pinMode(EncodePin2, INPUT);
   pinMode(EncodePin3, INPUT);
 
-  //pinMode(AnemometerPin, INPUT_PULLUP);
-  pinMode(AnemometerPin, INPUT);
+  pinMode(AnemometerPin, INPUT_PULLUP);
   pinMode(HumiPin, INPUT);
 
   /*interruption pour le pluviometre*/
   pinMode(PluviometerPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(PluviometerPin), int_pluvio, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PluviometerPin), int_pluvio, FALLING);
   
   /*ina219 ini*/
   ina219.begin();
@@ -93,11 +92,15 @@ void setup() {
 
   }
 
-
+//volatile bool flag_pluie = 0;
+//unsigned long previousMillis = 0;        // will store last time LED was updated
+//const long interval = 2000;           // interval at which to blink (milliseconds)
 
 
 // the loop function runs over and over again forever
 void loop() {
+  
+  
   if(flag_trame_recu == 1){//check si une trame valide a été reçu
       digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
       interpreteur();//traitement
@@ -105,8 +108,16 @@ void loop() {
      reset_all();//une fois traitement fini reset
     }else{
       digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+    }
+
+    /*if(flag_pluie == 1){
+      unsigned long currentMillis = millis();
+      if (currentMillis - previousMillis >= interval) {
+        previousMillis = currentMillis;
+        attachInterrupt(digitalPinToInterrupt(PluviometerPin), int_pluvio, FALLING);
+        flag_pluie =0;
       }
-   // delay(100);
+    }*/  
 }
 
 void serialEvent(){
@@ -136,6 +147,7 @@ void interpreteur(void){
           case '1':{//controle pwm servo
               String cmd =  Trame_RX;
               Control_servo(cmd);//1:1,180;
+               Serial.println("ACK");
                reset_all();
                break;
           }
@@ -235,6 +247,7 @@ void update_valeurs(void){
    
 
    encodeur = String(get_encoder_raw()); 
+
 
    windspeed = String(get_windspeed_raw());
    humidite = String(get_humi_raw());
