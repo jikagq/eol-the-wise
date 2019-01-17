@@ -6,8 +6,13 @@ volatile int pluie_tick =0;
 int get_girouette_raw(void){  
     return analogRead(GirouettePin) ;
 }
-int get_temperature_raw(void){   
-    return analogRead(TemperaturePin);
+int get_temperature_raw(void){  
+  int AnalogVolt = 0;
+  AnalogVolt = analogRead(TemperaturePin);
+  int temperature_raw = AnalogVolt *5 /1023;
+  temperature_raw = (temperature_raw *100) -273
+  
+  return temperature_raw;
 }
 int get_luminosite_raw(void){
     return analogRead(LightPin);
