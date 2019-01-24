@@ -10,7 +10,7 @@ int get_temperature_raw(void){
   int AnalogVolt = 0;
   AnalogVolt = analogRead(TemperaturePin);
   int temperature_raw = AnalogVolt *5 /1023;
-  temperature_raw = (temperature_raw *100) -273
+  temperature_raw = (temperature_raw *100) -273;
   
   return temperature_raw;
 }
@@ -23,14 +23,14 @@ int get_luminosite_raw(void){
 int get_encoder_raw(){
   int value=0;
   value = (digitalRead(EncodePin0)*pow(2,0)) + (digitalRead(EncodePin1)*pow(2,1)) + ( digitalRead(EncodePin2)*pow(2,2))+ (digitalRead(EncodePin3)*pow(2,3));
-  Serial.println(digitalRead(EncodePin0));
-  Serial.println(digitalRead(EncodePin1));
-  Serial.println(digitalRead(EncodePin2));
-  Serial.println(digitalRead(EncodePin3));
+  //Serial.println(digitalRead(EncodePin0));
+  //Serial.println(digitalRead(EncodePin1));
+  //Serial.println(digitalRead(EncodePin2));
+  //Serial.println(digitalRead(EncodePin3));
   return value;
 }
 
-float get_windspeed_raw(void) {
+/*float get_windspeed_raw(void) {
   float windspeed_raw = 0;
   
   windspeed_raw = getFrequency(AnemometerPin);
@@ -43,7 +43,7 @@ float get_windspeed_raw(void) {
     return windspeed_raw/2.4;
     //return windspeed_raw;
   }
-}
+}*/
 
 float get_humi_raw(void){
   float humidite_raw = 0;
@@ -103,26 +103,35 @@ void int_pluvio(void){
     }
 }
 
+  
 
-/*int get_windspeed_raw() {
-  //avec interruption sur 2 ou 3
-  int int_time = millis();
-  int cur_time=0;
+float get_windspeed_raw() {
   wind_tick =0;
   
+  Serial.println("debut");
   attachInterrupt(digitalPinToInterrupt(AnemometerPin), int_anemometer, CHANGE);
-  while(cur_time < int_time+60000){
-    cur_time = millis();
-    Serial.println(cur_time);
-  }
-  detachInterrupt(digitalPinToInterrupt(AnemometerPin)) ;
-
-  return wind_tick * 2,4;
   
+  
+  /*while(time_flag == 0){
+    unsigned long currentMillis = millis();
+    //Serial.println(currentMillis);
+    if((unsigned long)(currentMillis - previousMillis) >= interval){
+      Serial.println(currentMillis);
+      previousMillis = currentMillis; //si tps fini
+      time_flag =1;
+    }
+  }*/
+  delay(1000);//attend pendant 1s les mesures
+ detachInterrupt(digitalPinToInterrupt(AnemometerPin)) ;
+  Serial.println("fin");
+
+  Serial.println(wind_tick);
+  return wind_tick * 2.4;
 }
 void int_anemometer(){
   wind_tick++; 
-}*/
+   Serial.println("tick");
+}
 
 
 

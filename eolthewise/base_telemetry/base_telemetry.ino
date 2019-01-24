@@ -18,7 +18,7 @@
 #define EncodePin2 6
 #define EncodePin3 7
 
-#define AnemometerPin 12
+#define AnemometerPin 2
 #define HumiPin 8
 
 #define PluviometerPin 3
@@ -195,6 +195,7 @@ void interpreteur(void){
               break;
                }
           case 'w':{//vitesse anemometre
+              windspeed = String(get_windspeed_raw());//test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
               Trame_TX = windspeed+";";
               Serial.println(Trame_TX);
               reset_all();
