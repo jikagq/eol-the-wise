@@ -6,12 +6,17 @@ volatile int pluie_tick =0;
 int get_girouette_raw(void){  
     return analogRead(GirouettePin) ;
 }
-int get_temperature_raw(void){  
+float get_temperature_raw(void){  
   int AnalogVolt = 0;
   AnalogVolt = analogRead(TemperaturePin);
-  int temperature_raw = AnalogVolt *5 /1023;
-  temperature_raw = (temperature_raw *100) -273;
+  float temperature_raw = (float)(AnalogVolt *5) /(float)1023;
+
+  //float temperature_raw = ((float)( AnalogVolt-290)*10)/(float)11;
+
+ // Serial.println(temperature_raw);
   
+ temperature_raw = (temperature_raw *100) -273;
+  //return AnalogVolt;
   return temperature_raw;
 }
 int get_luminosite_raw(void){
@@ -21,13 +26,68 @@ int get_luminosite_raw(void){
 
 /*digital measure*/
 int get_encoder_raw(){
+
   int value=0;
-  value = (digitalRead(EncodePin0)*pow(2,0)) + (digitalRead(EncodePin1)*pow(2,1)) + ( digitalRead(EncodePin2)*pow(2,2))+ (digitalRead(EncodePin3)*pow(2,3));
+  bool e0=1;
+  bool e1=1;
+  bool e2=1;
+  bool e3 =1;
+  
   //Serial.println(digitalRead(EncodePin0));
   //Serial.println(digitalRead(EncodePin1));
   //Serial.println(digitalRead(EncodePin2));
   //Serial.println(digitalRead(EncodePin3));
+
+  e0=digitalRead(EncodePin0);
+  e1=digitalRead(EncodePin1);
+  e2=digitalRead(EncodePin2);
+  e3=digitalRead(EncodePin3);
+  
+  Serial.println("");
+
+  if(e0 == 0){
+    //Serial.println(1);
+    e0=1;
+  }else{
+    //Serial.println(0);
+    e0=0;
+  }
+  if(e1 == 0){
+    //Serial.println(1);
+    e1=1;
+  }else{
+    //Serial.println(0);
+    e1=0;
+  }
+  if(e2 == 0){
+    //Serial.println(1);
+    e2=1;
+  }else{
+    //Serial.println(0);
+    e2=0;
+  }
+  if(e3 == 0){
+   // Serial.println(1);
+    e3=1;
+  }else{
+    //Serial.println(0);
+    e3=0;
+  }
+  value = (e0*pow(2,0)) + (e1*pow(2,1)) + ( e2*pow(2,2))+ (e3*pow(2,3));
+  value = GrayToBinary(value);
   return value;
+}
+
+
+unsigned int GrayToBinary(unsigned int num)
+{
+    unsigned int mask = num >> 1;
+    while (mask != 0)
+    {
+        num = num ^ mask;
+        mask = mask >> 1;
+    }
+    return num;
 }
 
 /*float get_windspeed_raw(void) {
@@ -108,29 +168,19 @@ void int_pluvio(void){
 float get_windspeed_raw() {
   wind_tick =0;
   
-  Serial.println("debut");
+  //Serial.println("debut");
   attachInterrupt(digitalPinToInterrupt(AnemometerPin), int_anemometer, CHANGE);
   
-  
-  /*while(time_flag == 0){
-    unsigned long currentMillis = millis();
-    //Serial.println(currentMillis);
-    if((unsigned long)(currentMillis - previousMillis) >= interval){
-      Serial.println(currentMillis);
-      previousMillis = currentMillis; //si tps fini
-      time_flag =1;
-    }
-  }*/
   delay(1000);//attend pendant 1s les mesures
- detachInterrupt(digitalPinToInterrupt(AnemometerPin)) ;
-  Serial.println("fin");
+  detachInterrupt(digitalPinToInterrupt(AnemometerPin)) ;
+  //Serial.println("fin");
 
-  Serial.println(wind_tick);
+  //Serial.println(wind_tick);
   return wind_tick * 2.4;
 }
 void int_anemometer(){
   wind_tick++; 
-   Serial.println("tick");
+   //Serial.println("tick");
 }
 
 

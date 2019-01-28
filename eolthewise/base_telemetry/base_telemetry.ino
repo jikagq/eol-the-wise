@@ -92,10 +92,6 @@ void setup() {
 
   }
 
-//volatile bool flag_pluie = 0;
-//unsigned long previousMillis = 0;        // will store last time LED was updated
-//const long interval = 2000;           // interval at which to blink (milliseconds)
-
 
 // the loop function runs over and over again forever
 void loop() {
@@ -110,21 +106,9 @@ void loop() {
       digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
     }
 
-    /*if(flag_pluie == 1){
-      unsigned long currentMillis = millis();
-      if (currentMillis - previousMillis >= interval) {
-        previousMillis = currentMillis;
-        attachInterrupt(digitalPinToInterrupt(PluviometerPin), int_pluvio, FALLING);
-        flag_pluie =0;
-      }
-    }*/
-    /*Serial.println("insgfs");  
-    delay(100);
 
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);
-    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);*/
+    //update_valeurs(void);
+   // delay();
 }
 
 void serialEvent(){
@@ -195,7 +179,7 @@ void interpreteur(void){
               break;
                }
           case 'w':{//vitesse anemometre
-              windspeed = String(get_windspeed_raw());//test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              //windspeed = String(get_windspeed_raw());//test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
               Trame_TX = windspeed+";";
               Serial.println(Trame_TX);
               reset_all();
