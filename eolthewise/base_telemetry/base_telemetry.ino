@@ -84,7 +84,7 @@ void setup() {
   ina219.begin();
   /*calibration si besoin*/
   //ina219.setCalibration_32V_1A();
-  //ina219.setCalibration_16V_400mA();
+  ina219.setCalibration_16V_400mA();
 
   /*servomoteurs*/
   Servo1.attach(ServoPin1);
@@ -109,6 +109,12 @@ void loop() {
 
     //update_valeurs(void);
    // delay();
+
+  /*test*/
+  /*update_valeurs();
+   Serial.println(send_all_measure());
+  reset_all();
+   delay(2000);*/
 }
 
 void serialEvent(){
@@ -138,7 +144,7 @@ void interpreteur(void){
           case '1':{//controle pwm servo
               String cmd =  Trame_RX;
               Control_servo(cmd);//1:1,180;
-               Serial.println("ACK;");
+               //Serial.println("ACK;");
                reset_all();
                break;
           }
@@ -150,7 +156,7 @@ void interpreteur(void){
           }
           case '3':{//mise Ã  jour des capteurs
               update_valeurs();
-              Serial.println("ACK;");
+              //Serial.println("ACK;");
               reset_all();
               break;
           }
