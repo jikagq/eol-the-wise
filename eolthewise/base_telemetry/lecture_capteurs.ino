@@ -1,30 +1,37 @@
+/*Wind farm ping project 55
+ * wind side
+ *lecture_capteurs.ino
+ *Read sensors measures
+ *Théo Paris 2018
+*/
 volatile int wind_tick =0;
 volatile int pluie_tick =0;
 
 
 /*analogues measures*/
+
+/*measure weather vane sensor*/
 int get_girouette_raw(void){  
     return analogRead(GirouettePin) ;
 }
+
+/*measure temperature sensor*/
 float get_temperature_raw(void){  
   int AnalogVolt = 0;
+  
   AnalogVolt = analogRead(TemperaturePin);
   float temperature_raw = (float)(AnalogVolt *5) /(float)1023;
-
-  //float temperature_raw = ((float)( AnalogVolt-290)*10)/(float)11;
-
- // Serial.println(temperature_raw);
-  
  temperature_raw = (temperature_raw *100) -273;
-  //return AnalogVolt;
   return temperature_raw;
 }
+/*measure light sensor*/
 int get_luminosite_raw(void){
     return analogRead(LightPin);
 }
 
-
 /*digital measure*/
+
+/*measure encoder*/
 int get_encoder_raw(){
 
   int value=0;
@@ -32,17 +39,13 @@ int get_encoder_raw(){
   bool e1=1;
   bool e2=1;
   bool e3 =1;
-  
-  //Serial.println(digitalRead(EncodePin0));
-  //Serial.println(digitalRead(EncodePin1));
-  //Serial.println(digitalRead(EncodePin2));
-  //Serial.println(digitalRead(EncodePin3));
 
   e0=digitalRead(EncodePin0);
   e1=digitalRead(EncodePin1);
   e2=digitalRead(EncodePin2);
   e3=digitalRead(EncodePin3);
-  
+
+  /*etais ce la l'erreur ????*/
   Serial.println("");
 
   if(e0 == 0){
@@ -74,11 +77,11 @@ int get_encoder_raw(){
     e3=0;
   }
   value = (e0*pow(2,0)) + (e1*pow(2,1)) + ( e2*pow(2,2))+ (e3*pow(2,3));
-  value = GrayToBinary(value);
+  value = GrayToBinary(value);//convert gray code from encodeur to natural binnary
   return value;
 }
 
-
+/*convert gray code to natural binnary*/
 unsigned int GrayToBinary(unsigned int num)
 {
     unsigned int mask = num >> 1;
@@ -90,21 +93,7 @@ unsigned int GrayToBinary(unsigned int num)
     return num;
 }
 
-/*float get_windspeed_raw(void) {
-  float windspeed_raw = 0;
-  
-  windspeed_raw = getFrequency(AnemometerPin);
-
-  //Serial.println(windspeed_raw);
-  
-  if(windspeed_raw == -1){
-    return 0.0;
-  }else{
-    return windspeed_raw/2.4;
-    //return windspeed_raw;
-  }
-}*/
-
+/*measure moist sensor*/
 float get_humi_raw(void){
   float humidite_raw = 0;
   
@@ -116,6 +105,7 @@ float get_humi_raw(void){
   }
 }
 
+/*measure a frequency*/
 long getFrequency(int pin) {
   //https://tushev.org/articles/arduino/9/measuring-frequency-with-arduino
   #define SAMPLES 4
@@ -144,72 +134,33 @@ long getFrequency(int pin) {
 return freq / SAMPLES;
 }
 
-
+/*measure pluviometer data*/
+/*0.2794ml = 1 pluviometer switch*/
 float get_rain_raw(void){
-  //float rain_raw = 0;
-  //Serial.println(pluie_tick * 0,2794);
-  //Serial.println(pluie_tick);
   return pluie_tick * 0.2794;
 }
 
-
+/*inteerupt that count when the pluviometer switch*/
 volatile unsigned long lastInterrupt;
 void int_pluvio(void){
    if(millis() - lastInterrupt > 10) // we set a 10ms no-interrupts window
     {    
-      pluie_tick++;
-      //Serial.println(pluie_tick);
+      pluie_tick++;//count the number of pluviometer switch
       lastInterrupt = millis();
     }
 }
-
-  
-
+ 
+/*measure the wind speed km/s with interrup*/
 float get_windspeed_raw() {
   wind_tick =0;
-  
-  //Serial.println("debut");
-  attachInterrupt(digitalPinToInterrupt(AnemometerPin), int_anemometer, CHANGE);
-  
-  delay(1000);//attend pendant 1s les mesures
-  detachInterrupt(digitalPinToInterrupt(AnemometerPin)) ;
-  //Serial.println("fin");
-
-  //Serial.println(wind_tick);
+  attachInterrupt(digitalPinToInterrupt(AnemometerPin), int_anemometer, CHANGE);//enable interrupt
+  delay(1000);//when the interrupt is enable wait 1s to measure the number of anemometer tick's
+  detachInterrupt(digitalPinToInterrupt(AnemometerPin)) ;//disable the interrup
   return wind_tick * 2.4;
 }
 void int_anemometer(){
-  wind_tick++; 
-   //Serial.println("tick");
+  wind_tick++; //count the number of anemometer tick's
 }
-
-
-
-
-
-/**float freqmeasurement(void){
-  //!!! avec la lib freq measure uniqument sur pin8 et pin 10 et 9 inutile avec en pwm
-  //http://www.pjrc.com/teensy/td_libs_FreqMeasure.html
-  double sum=0;
-  int count=0;
-  int i = 0;
-  FreqMeasure.begin();
-  for(i=0;i<10);i++){
-    if (FreqMeasure.available()) {
-      // average several reading together
-      sum = sum + FreqMeasure.read();
-      count = count + 1;
-      if (count > 30) {
-        float frequency = FreqMeasure.countToFrequency(sum / count);
-        Serial.println(frequency);
-        sum = 0;
-        count = 0;
-      }
-    }
-  }
-  FreqMeasure.end();
-  return frequency;
-}**/
 
 
 

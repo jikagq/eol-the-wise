@@ -1,36 +1,43 @@
+/*Wind farm ping project 55
+ * wind side
+ *base_telemetry.ino
+ *Communication and command processing
+ *Théo Paris 2018
+*/
+
 #include <Adafruit_INA219.h>
 #include <Wire.h>
-
 #include <Servo.h>
 
-//#include <FreqMeasure.h>
-
-/*code base station telemetry*/
-
-/*analogue measures*/
+/*analogue measures pins*/
 #define TemperaturePin 0
 #define LightPin 1
 #define GirouettePin 2
 
-/*digital measures*/
+/*digital measures pins*/
 #define EncodePin0 4
 #define EncodePin1 5
 #define EncodePin2 6
 #define EncodePin3 7
 
-#define AnemometerPin 2
+#define AnemometerPin 2//interrupt
 #define HumiPin 8
 
-#define PluviometerPin 3
+#define PluviometerPin 3//interrupt
 
 
 /*Servo Pins*/
 #define ServoPin1 9
-#define ServoPin2 10
+#define ServoPin2 11
 
 /*I2C PINS*/
 Adafruit_INA219 ina219;
 
+/*servomoteurs*/
+Servo Servo1;
+Servo Servo2;
+
+/*variables for saving measure to send*/
 String temperature = "0";
 String luminosite = "0";
 String girouette = "0";
@@ -46,15 +53,13 @@ String current = "0";
 String power = "0";
 
 
-/*Var communication*/
+/*Var for communicate with raspberry pi*/
 char incomingChar = '\0';   // for incoming serial data
 String Trame_RX ="";
 String Trame_TX ="";
 bool flag_trame_recu=0;
 
-/*servomoteurs*/
-Servo Servo1;
-Servo Servo2;
+
 
 
 void setup() {
@@ -82,7 +87,7 @@ void setup() {
   
   /*ina219 ini*/
   ina219.begin();
-  /*calibration si besoin*/
+  /*calibrate ina219*/
   //ina219.setCalibration_32V_1A();
   ina219.setCalibration_16V_400mA();
 
@@ -97,11 +102,11 @@ void setup() {
 void loop() {
   
   
- if(flag_trame_recu == 1){//check si une trame valide a Ã©tÃ© reÃ§u
+ if(flag_trame_recu == 1){//check if a valid command has been received 
       digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-      interpreteur();//traitement
+      interpreteur();//process the command
       //Serial.println("recu: "+Trame_RX);
-     reset_all();//une fois traitement fini reset
+     reset_all();//when process is finished reset all communication variable
     }else{
       digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
     }
@@ -115,55 +120,58 @@ void loop() {
    Serial.println(send_all_measure());
   reset_all();
    delay(2000);*/
+
 }
 
+/*listen the serial port and detect trame*/
 void serialEvent(){
   if (Serial.available() > 0) {
         incomingChar = Serial.read();  // read the incoming byte:
         if(incomingChar == ';'){//fin de trame
-          flag_trame_recu=1;
+          flag_trame_recu=1;//trame detected
         }else{//ajout du caractere Ã  la suite de la chaine
           Trame_RX = Trame_RX+ incomingChar;
-          flag_trame_recu=0;  
+          flag_trame_recu=0;  //no trame detected
         }
     }
 }
 
+/*detect the command received*/
 void interpreteur(void){
     char c = '\0';
-    c = Trame_RX.charAt(0);
+    c = Trame_RX.charAt(0); // the first caracter reprsesent the type of the command
     switch(c){
-          case '0' :{//mode test test
-              Serial.println("Base station telemetry V2");
+          case '0' :{//com test
+              Serial.println("Base telemetry V2");
               Serial.println("Serial Frame detected");
               Serial.println("Ground telemetry ok");
               Serial.println("Communication test ok :)");
               reset_all();
               break;
           }
-          case '1':{//controle pwm servo
+          case '1':{//pwm servo command
               String cmd =  Trame_RX;
               Control_servo(cmd);//1:1,180;
                //Serial.println("ACK;");
                reset_all();
                break;
           }
-          case '2' :{//send all
+          case '2' :{//send all value
                 update_valeurs();
                 Serial.println(send_all_measure());
                 reset_all();
                 break;
           }
-          case '3':{//mise Ã  jour des capteurs
+          case '3':{//update sensors
               update_valeurs();
               //Serial.println("ACK;");
               reset_all();
               break;
           }
           case 't':{//tempÃ©rature
-               Trame_TX = temperature+";";
-               Serial.println(Trame_TX);
-               reset_all();
+               Trame_TX = temperature+";";//create trame
+               Serial.println(Trame_TX);//send the trame on serial port
+               reset_all();//reset all communciation variable
                break;
                }
           case 'l':{//luminositÃ©
@@ -185,7 +193,6 @@ void interpreteur(void){
               break;
                }
           case 'w':{//vitesse anemometre
-              //windspeed = String(get_windspeed_raw());//test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
               Trame_TX = windspeed+";";
               Serial.println(Trame_TX);
               reset_all();
@@ -228,6 +235,7 @@ void interpreteur(void){
           }
 }
 
+/*reset communication variables*/
 void reset_all(void){
   incomingChar = '\0';   // for incoming serial data
   Trame_RX ="";
@@ -236,17 +244,14 @@ void reset_all(void){
 }
 
 
-
+/*update all sensors data*/
 void update_valeurs(void){
    temperature = String(get_temperature_raw());
    luminosite  = String(get_luminosite_raw());
    girouette   = String(get_girouette_raw());
-
    
-
    encodeur = String(get_encoder_raw()); 
-
-
+   
    windspeed = String(get_windspeed_raw());
    humidite = String(get_humi_raw());
    rain = String(get_rain_raw());
@@ -254,12 +259,10 @@ void update_valeurs(void){
    voltage = String(get_voltage_raw());
    current = String(get_current_raw());
    power = String(get_power_raw());
-
-  
 }
 
+/*returns all sensors values*/
 String  send_all_measure(void){
-
    return "t:"+temperature+","+"l:"+luminosite+","+"g:"+girouette+","+"e:"+encodeur+","+"w:"+windspeed+","+"h:"+humidite+","+"r:"+rain+","+"v:"+voltage+","+"c:"+current+","+"p:"+power+";";
 }
 
